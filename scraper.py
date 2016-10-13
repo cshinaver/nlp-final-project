@@ -51,16 +51,23 @@ def get_posts_for_month_and_year(month=None, year=None):
         posts.append(post)
     return posts
 
-if __name__ == '__main__':
-    json_posts = []
-    for i in range(1, 9):
+
+def posts_for_year_and_month_range(year, month_range):
+    """
+    Input: ('2016', (1, 10))
+    """
+    post_objects = []
+    for i in range(month_range[0], month_range[1] + 1):
         month = "".join(["0", str(i)])
-        posts = get_posts_for_month_and_year(month=month, year='2016')
+        posts = get_posts_for_month_and_year(month=month, year=year)
         for post in posts:
             data = {
                 'title': post.title,
                 'link': post.link,
                 'description': post.description,
             }
-            json_posts.append(data)
-    print(json.dumps(json_posts))
+            post_objects.append(data)
+    return post_objects
+
+if __name__ == '__main__':
+    print(json.dumps(posts_for_year_and_month_range(2015, (1, 12))))
