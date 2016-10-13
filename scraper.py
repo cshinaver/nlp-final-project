@@ -3,8 +3,11 @@
 # Pulls post data from calendar.nd.edu
 
 import json
+import logging
 import requests
 from bs4 import BeautifulSoup
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 class Post:
@@ -19,6 +22,7 @@ def get_post_description(link):
 
 
 def get_posts_for_month_and_year(month=None, year=None):
+    logging.info('Getting posts for month {} year {}'.format(month, year))
     posts = []
     html_doc = requests.get(
         'http://calendar.nd.edu/events/cal/month/{year}{month}01/35_All+Events/'.format(
@@ -32,7 +36,9 @@ def get_posts_for_month_and_year(month=None, year=None):
     rows = event_list_table.find_all('tr')
     all_event_rows = rows[2:]
 
+    remaining_rows = len(all_event_rows)
     for row in all_event_rows:
+        logging.info('{} remaining rows'.format(remaining_rows))
         td_tags_for_row = row.find_all('td')
 
         # Ignore row if is a date row
