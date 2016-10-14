@@ -6,6 +6,7 @@ import argparse
 import json
 import logging
 import multiprocessing
+import os
 import requests
 from bs4 import BeautifulSoup
 
@@ -188,5 +189,11 @@ if __name__ == '__main__':
                 category_link
             )
         )
+    current_posts = []
+    if os.path.isfile('train'):
+        with open('train', 'r') as f:
+            current_posts = json.loads(f.read())
+    current_posts.extend(posts)
+
     with open('train', 'w') as f:
-        f.write(json.dumps(posts))
+        f.write(json.dumps(current_posts))
