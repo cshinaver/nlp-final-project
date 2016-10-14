@@ -15,10 +15,17 @@ N_PROCESSES = 1
 
 
 class Post:
-    def __init__(self, description=None, link=None, title=None):
+    def __init__(
+        self,
+        description=None,
+        link=None,
+        title=None,
+        category=None,
+    ):
         self.description = description
         self.title = title
         self.link = link
+        self.category = category
 
     def __repr__(self):
         return str(self.__dict__)
@@ -58,6 +65,16 @@ def parse_args():
         required=True,
         help='Number of processes to run processing'
     )
+    parser.add_argument(
+        '--category-url-name',
+        type=str,
+        required=True
+    )
+    parser.add_argument(
+        '--category-name',
+        type=str,
+        required=True
+    )
     return parser.parse_args()
 
 
@@ -69,14 +86,21 @@ def get_post_description(link):
     return description
 
 
-def get_posts_for_month_and_year(month=None, year=None):
+def get_posts_for_month_and_year(
+    month=None,
+    year=None,
+    category_name=None,
+    category_link=None,
+):
     logging.info('Getting posts for month {} year {}'.format(month, year))
     posts = None
+    link = 'http://calendar.nd.edu/events/cal/month/{year}{month}01/'.format(
+        year=year,
+        month=month
+    )
+    link += category_link
     html_doc = requests.get(
-        'http://calendar.nd.edu/events/cal/month/{year}{month}01'.format(
-            year=year,
-            month=month
-        )
+        link
     ).content
 
     soup = BeautifulSoup(html_doc)
@@ -87,6 +111,9 @@ def get_posts_for_month_and_year(month=None, year=None):
     with multiprocessing.Pool(N_PROCESSES) as p:
         posts = p.map(get_post_object_for_table_row, event_rows_html)
 
+    for post in posts:
+        if post:
+            post.category = category_name
     return posts
 
 
@@ -110,7 +137,12 @@ def get_post_object_for_table_row(row):
     return post
 
 
-def posts_for_year_and_month_range(year, month_range):
+def posts_for_year_and_month_range(
+    year,
+    month_range,
+    category_name,
+    category_link,
+):
     """
     Input: ('2016', (1, 10))
     """
@@ -119,13 +151,19 @@ def posts_for_year_and_month_range(year, month_range):
         month = "".join(["0", str(i)])
         posts = filter(
                     lambda x: x is not None,
-                    get_posts_for_month_and_year(month=month, year=year),
+                    get_posts_for_month_and_year(
+                        month=month,
+                        year=year,
+                        category_name=category_name,
+                        category_link=category_link,
+                        ),
                 )
         for post in posts:
             data = {
                 'title': post.title,
                 'link': post.link,
                 'description': post.description,
+                'category': post.category,
             }
             post_objects.append(data)
     return post_objects
@@ -136,12 +174,19 @@ if __name__ == '__main__':
     last_month = args.last_month
     first_year = args.first_year
     last_year = args.last_year
+    category_name = args.category_name
+    category_link = args.category_url_name
     N_PROCESSES = args.n_processes
 
     posts = []
     for year in range(first_year, last_year + 1):
         posts.extend(
-            posts_for_year_and_month_range(year, (first_month, last_month))
+            posts_for_year_and_month_range(
+                year,
+                (first_month, last_month),
+                category_name,
+                category_link
+            )
         )
     with open('train', 'w') as f:
         f.write(json.dumps(posts))
