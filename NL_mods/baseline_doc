@@ -1,0 +1,19 @@
+Nicholas Lombardo 
+Charles Shinaver
+Alec Borowsky
+NLP Baseline Project
+Event Categorizer
+Idea: 
+	The scope of this project is to take Notre Dame Calendar event data and predict the categories of new events. Each calendar event belongs to a category and contains a description. Our model will train to predict the correct category for each event description. Once trained the model will be useful for reading in new events and giving possible categories that are similar. 
+Dataset:
+	Our dataset will be the Notre Dame event data from the last five years. This can be found at http://calendar.nd.edu/events/cal/month/20161013/35_All+Events/ where “/20161013/” can be replaced with any date to retrieve the events for that date. To obtain the data we are scraping the site. For each category and each event in that category the data stored includes the link, event title, event description, and event category. This data will be separated into train, dev, and test sets. For future tests, the training set will likely consist of posts from the years 2011-2014, the dev set consists of posts from 2015, and the test set consists of posts from 2016. 
+Metrics:
+	We will measure success by the accuracy of the model at predicting the category of event descriptions in the test set. Further tests will be running the model on the RSS feed to continually check accuracy.
+Baseline method: 
+	Bag of words similar to homework 1 where we matched speakers and their documents. For this set we will be matching event descriptions to their tags.
+	train set: Months 1-12, Year: 2016 Lines: ~60,000
+	test set: Months 8-12, Years: 2013-2014 ~8,000
+Performance of Baseline: 
+	This test was conducted with a 0.5 smoothing delta and a simple naive bayes, bag of words model.
+
+	25.16% accuracy 
